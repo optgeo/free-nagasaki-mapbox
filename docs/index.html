@@ -1,0 +1,55 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+<script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
+<script src="https://unpkg.com/@loaders.gl/3d-tiles@^2.3.0/dist/dist.min.js"></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+<style>
+html { height: 100%; }
+body { padding: 0; margin: 0; overflow: hidden; height: 100%; }
+</style>
+</head>
+<body>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiaGZ1IiwiYSI6ImNsM3FtcWVjZzBidWgza3A3ajZzdjlnZDAifQ.wTaURNl4e3NMZHbw50LupQ';
+const map = new mapboxgl.Map({
+  container: document.body,
+  style: 'https://optgeo.github.io/nagi-vi/style-maplibre.json',
+  // style: 'https://optgeo.github.io/optbv-intl/optbv-intl-dev.json',
+  hash: true,
+  attributionControl: false
+})
+
+const searchParams = new URLSearchParams(window.location.search)
+let url = searchParams.get('tileset') || 'https://d21pj9gigeop84.cloudfront.net/data/point-cloud/lp-2022/22302_kawazu-cho/tileset.json'
+
+map.on('load', () => {
+  const { MapboxLayer, Tile3DLayer, Vector3 } = deck
+
+  const layer = new MapboxLayer({
+    id: '3d',
+    type: Tile3DLayer,
+    pointSize: 1.6,
+    data: url,
+    loader: Tiles3DLoader,
+    loadOptions: {
+      tileset: {
+        viewDistanceScale: 1.2
+      }
+    },
+    onTileLoad: (header) => {
+      //console.log(header.content.cartographicOrigin.z)
+      //header.content.cartographicOrigin.z += 20
+      //console.log(header.content.cartographicOrigin.z)
+    }
+  })
+  for(n of '3103 3102 3101 3112 3111 4301 4302'.split(' ')) {
+    map.removeLayer(`buildings${n}`)
+  }
+  map.addLayer(layer, 'm50100-150')
+})
+</script>
+</body>
+</html>
